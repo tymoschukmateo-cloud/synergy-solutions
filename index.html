@@ -1511,38 +1511,32 @@ document.querySelectorAll('.act-card,.proj-card').forEach(card => {
 
 /* ─── NOTICIAS DEL SECTOR ─── */
 (function(){
-  var RSS2JSON_URL = '/.netlify/functions/noticias';
-  var FALLBACK_IMG = 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=600&q=80';
+  var FALLBACK_IMG = 'https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=600&q=80';
+  var GUARDIAN_URL = 'https://content.guardianapis.com/search?q=biofuels+ethanol+bioethanol&section=environment|science|business&show-fields=thumbnail,trailText,headline&page-size=3&api-key=test';
 
   var FALLBACK = [
     {
       title: 'Argentina debate la política de corte de biocombustibles para 2024',
       description: 'El sector productivo analiza los porcentajes de mezcla obligatoria de biodiesel y bioetanol en el marco de la transición energética y la demanda de combustibles sustentables.',
-      link: 'https://www.lanacion.com.ar/economia/biocombustibles',
-      pubDate: '2024-03-15 10:00:00',
-      thumbnail: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=600&q=80'
+      url: 'https://www.lanacion.com.ar/economia/biocombustibles',
+      date: '15 de marzo de 2024',
+      image: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=600&q=80'
     },
     {
       title: 'Plantas de etanol: nuevas inversiones impulsan la capacidad productiva regional',
       description: 'El mercado de etanol de maíz suma proyectos de expansión en Argentina y Brasil, con tecnologías de fermentación continua que elevan el rendimiento y reducen costos operativos.',
-      link: 'https://www.cronista.com/economia-politica/biocombustibles',
-      pubDate: '2024-03-10 08:30:00',
-      thumbnail: 'https://images.unsplash.com/photo-1581093458791-9d09c95b3e66?w=600&q=80'
+      url: 'https://www.cronista.com/economia-politica/biocombustibles',
+      date: '10 de marzo de 2024',
+      image: 'https://images.unsplash.com/photo-1581093458791-9d09c95b3e66?w=600&q=80'
     },
     {
       title: 'Biocombustibles y descarbonización: el rol estratégico del etanol en la región',
       description: 'El etanol de caña y maíz consolida su posición en la matriz energética latinoamericana como alternativa clave para reducir emisiones en el sector transporte.',
-      link: 'https://www.ambito.com/energia',
-      pubDate: '2024-03-05 14:15:00',
-      thumbnail: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=600&q=80'
+      url: 'https://www.ambito.com/energia',
+      date: '5 de marzo de 2024',
+      image: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=600&q=80'
     }
   ];
-
-  function fmtDate(str){
-    try{
-      return new Date(str).toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'});
-    }catch(e){return '';}
-  }
 
   function safeText(s){
     var d = document.createElement('div');
@@ -1565,37 +1559,34 @@ document.querySelectorAll('.act-card,.proj-card').forEach(card => {
     var grid = document.getElementById('news-grid');
     if(!grid) return;
     grid.innerHTML = items.map(function(a){
-      var img = a.thumbnail || FALLBACK_IMG;
+      var img = a.image || FALLBACK_IMG;
       var desc = truncate(a.description, 120);
       return '<div class="news-card">'
         + '<img class="news-img" src="'+img+'" alt="'+safeText(a.title)+'" loading="lazy" onerror="this.onerror=null;this.src=\''+FALLBACK_IMG+'\'">'
         + '<div class="news-body">'
-        + '<span class="news-date">'+fmtDate(a.pubDate)+'</span>'
+        + '<span class="news-date">'+safeText(a.date)+'</span>'
         + '<h3 class="news-title">'+safeText(a.title)+'</h3>'
         + '<p class="news-desc">'+safeText(desc)+'</p>'
-        + '<a href="'+a.link+'" class="news-link" target="_blank" rel="noopener noreferrer">Leer más →</a>'
+        + '<a href="'+safeText(a.url)+'" class="news-link" target="_blank" rel="noopener noreferrer">Leer más →</a>'
         + '</div></div>';
     }).join('');
   }
 
-  function normalizeGNews(articles){
-    return articles.map(function(a){
-      return {
-        title:     a.title,
-        description: a.description,
-        link:      a.url,
-        pubDate:   a.publishedAt,
-        thumbnail: a.image || ''
-      };
-    });
-  }
-
   function loadNews(){
-    fetch(RSS2JSON_URL)
+    fetch(GUARDIAN_URL)
       .then(function(r){ return r.json(); })
       .then(function(data){
-        if(data.articles && data.articles.length > 0){
-          renderCards(normalizeGNews(data.articles.slice(0,3)));
+        if(data.response && data.response.results && data.response.results.length > 0){
+          var articles = data.response.results.map(function(item){
+            return {
+              title: item.webTitle,
+              description: (item.fields && item.fields.trailText) || 'Artículo sobre biocombustibles y energía sostenible.',
+              image: (item.fields && item.fields.thumbnail) || FALLBACK_IMG,
+              url: item.webUrl,
+              date: new Date(item.webPublicationDate).toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'})
+            };
+          });
+          renderCards(articles);
         } else {
           renderCards(FALLBACK);
         }
