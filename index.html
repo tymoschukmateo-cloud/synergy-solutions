@@ -1512,14 +1512,7 @@ document.querySelectorAll('.act-card,.proj-card').forEach(card => {
 /* ─── NOTICIAS DEL SECTOR ─── */
 (function(){
   var FALLBACK_IMG = 'https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=600&q=80';
-
-  var RSS_FEEDS = [
-    'https://api.rss2json.com/v1/api.json?rss_url=https://feeds.feedburner.com/RenewableEnergyWorld&count=2',
-    'https://api.rss2json.com/v1/api.json?rss_url=https://www.reuters.com/rssFeed/businessNews&count=2',
-    'https://api.rss2json.com/v1/api.json?rss_url=https://rss.nytimes.com/services/xml/rss/nyt/Business.xml&count=2',
-    'https://api.rss2json.com/v1/api.json?rss_url=https://feeds.bbci.co.uk/news/science_and_environment/rss.xml&count=2',
-    'https://api.rss2json.com/v1/api.json?rss_url=https://www.ft.com/rss/home/uk&count=1'
-  ];
+  var GUARDIAN_URL = 'https://content.guardianapis.com/search?q=biofuels+ethanol+bioethanol&section=environment|science|business&show-fields=thumbnail,trailText,headline&page-size=3&order-by=newest&api-key=test';
 
   var FALLBACK = [
     {
@@ -1562,14 +1555,6 @@ document.querySelectorAll('.act-card,.proj-card').forEach(card => {
     return s.length > max ? s.slice(0, max).replace(/\s+\S*$/, '') + '…' : s;
   }
 
-  function fmtDate(str){
-    try{
-      var d = new Date(str);
-      if(isNaN(d.getTime())) return '';
-      return d.toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'});
-    }catch(e){ return ''; }
-  }
-
   function renderCards(items){
     var grid = document.getElementById('news-grid');
     if(!grid) return;
@@ -1588,35 +1573,25 @@ document.querySelectorAll('.act-card,.proj-card').forEach(card => {
   }
 
   function loadNews(){
-    var requests = RSS_FEEDS.map(function(url){
-      return fetch(url)
-        .then(function(r){ return r.json(); })
-        .catch(function(){ return null; });
-    });
-
-    Promise.all(requests).then(function(results){
-      var all = [];
-      results.forEach(function(data){
-        if(data && data.items){
-          data.items.forEach(function(item){
-            var ts = item.pubDate ? new Date(item.pubDate).getTime() : 0;
-            all.push({
-              title:       item.title || '',
-              description: truncate(item.description || item.content || '', 150),
-              image:       item.thumbnail || (item.enclosure && item.enclosure.url) || FALLBACK_IMG,
-              url:         item.link || '',
-              date:        fmtDate(item.pubDate),
-              _ts:         ts
-            });
+    fetch(GUARDIAN_URL)
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if(data.response && data.response.results && data.response.results.length > 0){
+          var articles = data.response.results.map(function(item){
+            return {
+              title:       item.webTitle,
+              description: item.fields && item.fields.trailText ? item.fields.trailText : 'Artículo sobre biocombustibles y energía sostenible.',
+              image:       (item.fields && item.fields.thumbnail) ? item.fields.thumbnail : FALLBACK_IMG,
+              url:         item.webUrl,
+              date:        new Date(item.webPublicationDate).toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'})
+            };
           });
+          renderCards(articles);
+        } else {
+          renderCards(FALLBACK);
         }
-      });
-
-      var valid = all.filter(function(a){ return a.title; });
-      valid.sort(function(a, b){ return b._ts - a._ts; });
-
-      renderCards(valid.length > 0 ? valid.slice(0, 3) : FALLBACK);
-    }).catch(function(){ renderCards(FALLBACK); });
+      })
+      .catch(function(){ renderCards(FALLBACK); });
   }
 
   if(document.readyState === 'loading'){
