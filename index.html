@@ -1520,58 +1520,24 @@ document.querySelectorAll('.act-card,.proj-card').forEach(card => {
   var GUARDIAN_URL = 'https://content.guardianapis.com/search?q=bioethanol+biofuel+ethanol+renewable+energy&show-fields=thumbnail,trailText,headline&page-size=3&order-by=newest&api-key=test';
 
   var FALLBACK = [
-    {
-      title: 'Argentina debate la política de corte de biocombustibles para 2024',
-      description: 'El sector productivo analiza los porcentajes de mezcla obligatoria de biodiesel y bioetanol en el marco de la transición energética y la demanda de combustibles sustentables.',
-      url: 'https://www.lanacion.com.ar/economia/biocombustibles',
-      date: '15 de marzo de 2024',
-      image: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=600&q=80'
-    },
-    {
-      title: 'Plantas de etanol: nuevas inversiones impulsan la capacidad productiva regional',
-      description: 'El mercado de etanol de maíz suma proyectos de expansión en Argentina y Brasil, con tecnologías de fermentación continua que elevan el rendimiento y reducen costos operativos.',
-      url: 'https://www.cronista.com/economia-politica/biocombustibles',
-      date: '10 de marzo de 2024',
-      image: 'https://images.unsplash.com/photo-1581093458791-9d09c95b3e66?w=600&q=80'
-    },
-    {
-      title: 'Biocombustibles y descarbonización: el rol estratégico del etanol en la región',
-      description: 'El etanol de caña y maíz consolida su posición en la matriz energética latinoamericana como alternativa clave para reducir emisiones en el sector transporte.',
-      url: 'https://www.ambito.com/energia',
-      date: '5 de marzo de 2024',
-      image: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=600&q=80'
-    }
+    {title:'Argentina impulsa el corte de bioetanol al 15%', description:'El gobierno argentino avanza en la regulación que aumenta el porcentaje de bioetanol en combustibles.', image:FALLBACK_IMG, url:'https://www.argentina.gob.ar/energia/biocombustibles', date:'Abril 2025'},
+    {title:'Brasil alcanza récord en producción de etanol de maíz', description:'El sector sucroalcooleiro brasileño registra cifras históricas consolidando al país como referente regional.', image:FALLBACK_IMG, url:'https://www.unica.com.br', date:'Marzo 2025'},
+    {title:'Nuevas tecnologías de fermentación mejoran rendimiento en 18%', description:'Investigadores presentan avances en fermentación continua que incrementan la productividad de etanol.', image:FALLBACK_IMG, url:'https://www.renewable-ei.org', date:'Febrero 2025'}
   ];
 
-  function safeText(s){
-    var d = document.createElement('div');
-    d.textContent = s || '';
-    return d.innerHTML;
-  }
-
-  function stripHtml(s){
-    var d = document.createElement('div');
-    d.innerHTML = s || '';
-    return d.textContent || d.innerText || '';
-  }
-
-  function truncate(s, max){
-    s = stripHtml(s).trim();
-    return s.length > max ? s.slice(0, max).replace(/\s+\S*$/, '') + '…' : s;
-  }
+  function safeText(t){ return t ? t.replace(/</g,'&lt;').replace(/>/g,'&gt;') : ''; }
 
   function renderCards(items){
     var grid = document.getElementById('news-grid');
     if(!grid) return;
     grid.innerHTML = items.map(function(a){
       var img = a.image || FALLBACK_IMG;
-      var desc = truncate(a.description, 120);
       return '<div class="news-card">'
         + '<img class="news-img" src="'+img+'" alt="'+safeText(a.title)+'" loading="lazy" onerror="this.onerror=null;this.src=\''+FALLBACK_IMG+'\'">'
         + '<div class="news-body">'
-        + '<span class="news-date">'+safeText(a.date)+'</span>'
+        + '<span class="news-date">'+a.date+'</span>'
         + '<h3 class="news-title">'+safeText(a.title)+'</h3>'
-        + '<p class="news-desc">'+safeText(desc)+'</p>'
+        + '<p class="news-desc">'+safeText(a.description)+'</p>'
         + '<a href="'+safeText(a.url)+'" class="news-link" target="_blank" rel="noopener noreferrer">Leer más →</a>'
         + '</div></div>';
     }).join('');
@@ -1585,7 +1551,7 @@ document.querySelectorAll('.act-card,.proj-card').forEach(card => {
           var articles = data.response.results.map(function(item){
             return {
               title:       item.webTitle,
-              description: item.fields && item.fields.trailText ? item.fields.trailText : 'Artículo sobre biocombustibles y energía sostenible.',
+              description: item.fields && item.fields.trailText ? item.fields.trailText : '',
               image:       (item.fields && item.fields.thumbnail) ? item.fields.thumbnail : FALLBACK_IMG,
               url:         item.webUrl,
               date:        new Date(item.webPublicationDate).toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'})
