@@ -1520,27 +1520,29 @@ document.addEventListener('DOMContentLoaded', function(){
   if(!grid) return;
 
   var FALLBACK_IMG = 'https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=600&q=80';
-
   var FALLBACK = [
-    {title:'Argentina impulsa el corte de bioetanol al 15%', description:'El gobierno argentino avanza en la regulación que aumenta el porcentaje de bioetanol en combustibles, impulsando la demanda de plantas productoras.', image:FALLBACK_IMG, url:'https://www.argentina.gob.ar/energia/biocombustibles', date:'Abril 2025'},
-    {title:'Brasil alcanza récord en producción de etanol de maíz', description:'El sector sucroalcooleiro brasileño registra cifras históricas consolidando al país como referente regional en biocombustibles.', image:FALLBACK_IMG, url:'https://www.unica.com.br', date:'Marzo 2025'},
-    {title:'Nuevas tecnologías de fermentación mejoran rendimiento en 18%', description:'Investigadores presentan avances en fermentación continua que incrementan la productividad de etanol por tonelada de maíz.', image:FALLBACK_IMG, url:'https://www.renewable-ei.org', date:'Febrero 2025'}
+    {title:'UK largest bioethanol plant faces closure after trade deal', description:'Britain\'s largest bioethanol producer faces challenges following trade policy changes affecting the renewable fuels sector.', image:FALLBACK_IMG, url:'https://www.theguardian.com/environment/biofuels', date:'Abril 2026'},
+    {title:'Bioethanol production hits record levels in Latin America', description:'Argentina and Brazil lead regional growth in corn-based ethanol with new plants coming online throughout 2026.', image:FALLBACK_IMG, url:'https://www.unica.com.br', date:'Marzo 2026'},
+    {title:'New fermentation technology improves ethanol yield by 18%', description:'Researchers present advances in continuous fermentation that significantly increase ethanol productivity per ton of corn.', image:FALLBACK_IMG, url:'https://www.renewable-ei.org', date:'Febrero 2026'}
   ];
 
   function renderCards(items){
     grid.innerHTML = items.map(function(a){
       return '<div class="news-card">'
-        + '<img class="news-img" src="'+a.image+'" alt="" loading="lazy" onerror="this.src=\''+FALLBACK_IMG+'\'">'
-        + '<div class="news-body">'
-        + '<span class="news-date">'+a.date+'</span>'
-        + '<h3 class="news-title">'+a.title+'</h3>'
-        + '<p class="news-desc">'+a.description+'</p>'
-        + '<a href="'+a.url+'" class="news-link" target="_blank" rel="noopener">Leer más →</a>'
-        + '</div></div>';
+        +'<img class="news-img" src="'+a.image+'" alt="" loading="lazy" onerror="this.src=\''+FALLBACK_IMG+'\'">'
+        +'<div class="news-body">'
+        +'<span class="news-date">'+a.date+'</span>'
+        +'<h3 class="news-title">'+a.title+'</h3>'
+        +'<p class="news-desc">'+a.description+'</p>'
+        +'<a href="'+a.url+'" class="news-link" target="_blank" rel="noopener">Leer más →</a>'
+        +'</div></div>';
     }).join('');
   }
 
-  fetch('https://content.guardianapis.com/search?q=biofuels+ethanol+bioethanol&show-fields=thumbnail,trailText,headline&page-size=3&order-by=newest&api-key=test')
+  var PROXY = 'https://corsproxy.io/?';
+  var GUARDIAN = 'https://content.guardianapis.com/search?q=biofuels+ethanol+bioethanol&show-fields=thumbnail,trailText,headline&page-size=3&order-by=newest&api-key=test';
+
+  fetch(PROXY + encodeURIComponent(GUARDIAN))
     .then(function(r){ return r.json(); })
     .then(function(data){
       if(data.response && data.response.results && data.response.results.length > 0){
