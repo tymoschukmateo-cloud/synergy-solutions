@@ -1544,23 +1544,25 @@ document.querySelectorAll('.act-card,.proj-card').forEach(card => {
   }
 
   function loadNews(){
-    fetch(GUARDIAN_URL)
-      .then(r => r.json())
-      .then(data => {
+    fetch('https://content.guardianapis.com/search?q=biofuels+ethanol+bioethanol&section=environment%7Cscience%7Cbusiness&show-fields=thumbnail,trailText,headline&page-size=3&order-by=newest&api-key=test')
+      .then(function(r){ return r.json(); })
+      .then(function(data){
         if(data.response && data.response.results && data.response.results.length > 0){
-          const articles = data.response.results.map(item => ({
-            title:       item.webTitle,
-            description: item.fields?.trailText || 'Artículo sobre biocombustibles y energía sostenible.',
-            image:       item.fields?.thumbnail || FALLBACK_IMG,
-            url:         item.webUrl,
-            date:        new Date(item.webPublicationDate).toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'})
-          }));
+          var articles = data.response.results.map(function(item){
+            return {
+              title: item.webTitle,
+              description: (item.fields && item.fields.trailText) ? item.fields.trailText : 'Artículo sobre biocombustibles y energía sostenible.',
+              image: (item.fields && item.fields.thumbnail) ? item.fields.thumbnail : FALLBACK_IMG,
+              url: item.webUrl,
+              date: new Date(item.webPublicationDate).toLocaleDateString('es-AR', {day:'numeric', month:'long', year:'numeric'})
+            };
+          });
           renderCards(articles);
         } else {
           renderCards(FALLBACK);
         }
       })
-      .catch(() => renderCards(FALLBACK));
+      .catch(function(){ renderCards(FALLBACK); });
   }
 
   if(document.readyState === 'loading'){
