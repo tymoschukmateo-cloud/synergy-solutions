@@ -1515,62 +1515,50 @@ document.querySelectorAll('.act-card,.proj-card').forEach(card => {
 })();
 
 /* ─── NOTICIAS DEL SECTOR ─── */
-(function(){
-  const FALLBACK_IMG = 'https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=600&q=80';
-  const GUARDIAN_URL = 'https://content.guardianapis.com/search?q=biofuels+ethanol+bioethanol&section=environment|science|business&show-fields=thumbnail,trailText,headline&page-size=3&api-key=test';
+document.addEventListener('DOMContentLoaded', function(){
+  var grid = document.getElementById('news-grid');
+  if(!grid) return;
 
-  const FALLBACK = [
-    {title:'Argentina impulsa el corte de bioetanol al 15%', description:'El gobierno argentino avanza en la regulación que aumenta el porcentaje de bioetanol en combustibles.', image:FALLBACK_IMG, url:'https://www.argentina.gob.ar/energia/biocombustibles', date:'Abril 2025'},
-    {title:'Brasil alcanza récord en producción de etanol de maíz', description:'El sector sucroalcooleiro brasileño registra cifras históricas consolidando al país como referente regional.', image:FALLBACK_IMG, url:'https://www.unica.com.br', date:'Marzo 2025'},
-    {title:'Nuevas tecnologías de fermentación mejoran rendimiento en 18%', description:'Investigadores presentan avances en fermentación continua que incrementan la productividad de etanol.', image:FALLBACK_IMG, url:'https://www.renewable-ei.org', date:'Febrero 2025'}
+  var FALLBACK_IMG = 'https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=600&q=80';
+
+  var FALLBACK = [
+    {title:'Argentina impulsa el corte de bioetanol al 15%', description:'El gobierno argentino avanza en la regulación que aumenta el porcentaje de bioetanol en combustibles, impulsando la demanda de plantas productoras.', image:FALLBACK_IMG, url:'https://www.argentina.gob.ar/energia/biocombustibles', date:'Abril 2025'},
+    {title:'Brasil alcanza récord en producción de etanol de maíz', description:'El sector sucroalcooleiro brasileño registra cifras históricas consolidando al país como referente regional en biocombustibles.', image:FALLBACK_IMG, url:'https://www.unica.com.br', date:'Marzo 2025'},
+    {title:'Nuevas tecnologías de fermentación mejoran rendimiento en 18%', description:'Investigadores presentan avances en fermentación continua que incrementan la productividad de etanol por tonelada de maíz.', image:FALLBACK_IMG, url:'https://www.renewable-ei.org', date:'Febrero 2025'}
   ];
 
-  function safeText(t){ return t ? t.replace(/</g,'&lt;').replace(/>/g,'&gt;') : ''; }
-
   function renderCards(items){
-    const grid = document.getElementById('news-grid');
-    if(!grid) return;
-    grid.innerHTML = items.map(a => {
-      const img = a.image || FALLBACK_IMG;
+    grid.innerHTML = items.map(function(a){
       return '<div class="news-card">'
-        + '<img class="news-img" src="'+img+'" alt="'+safeText(a.title)+'" loading="lazy" onerror="this.onerror=null;this.src=\''+FALLBACK_IMG+'\'">'
+        + '<img class="news-img" src="'+a.image+'" alt="" loading="lazy" onerror="this.src=\''+FALLBACK_IMG+'\'">'
         + '<div class="news-body">'
         + '<span class="news-date">'+a.date+'</span>'
-        + '<h3 class="news-title">'+safeText(a.title)+'</h3>'
-        + '<p class="news-desc">'+safeText(a.description)+'</p>'
-        + '<a href="'+safeText(a.url)+'" class="news-link" target="_blank" rel="noopener noreferrer">Leer más →</a>'
+        + '<h3 class="news-title">'+a.title+'</h3>'
+        + '<p class="news-desc">'+a.description+'</p>'
+        + '<a href="'+a.url+'" class="news-link" target="_blank" rel="noopener">Leer más →</a>'
         + '</div></div>';
     }).join('');
   }
 
-  function loadNews(){
-    fetch('https://content.guardianapis.com/search?q=biofuels+ethanol+bioethanol&section=environment%7Cscience%7Cbusiness&show-fields=thumbnail,trailText,headline&page-size=3&order-by=newest&api-key=test')
-      .then(function(r){ return r.json(); })
-      .then(function(data){
-        if(data.response && data.response.results && data.response.results.length > 0){
-          var articles = data.response.results.map(function(item){
-            return {
-              title: item.webTitle,
-              description: (item.fields && item.fields.trailText) ? item.fields.trailText : 'Artículo sobre biocombustibles y energía sostenible.',
-              image: (item.fields && item.fields.thumbnail) ? item.fields.thumbnail : FALLBACK_IMG,
-              url: item.webUrl,
-              date: new Date(item.webPublicationDate).toLocaleDateString('es-AR', {day:'numeric', month:'long', year:'numeric'})
-            };
-          });
-          renderCards(articles);
-        } else {
-          renderCards(FALLBACK);
-        }
-      })
-      .catch(function(){ renderCards(FALLBACK); });
-  }
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', loadNews);
-  } else {
-    loadNews();
-  }
-})();
+  fetch('https://content.guardianapis.com/search?q=biofuels+ethanol+bioethanol&show-fields=thumbnail,trailText,headline&page-size=3&order-by=newest&api-key=test')
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if(data.response && data.response.results && data.response.results.length > 0){
+        renderCards(data.response.results.map(function(item){
+          return {
+            title: item.webTitle,
+            description: (item.fields && item.fields.trailText) ? item.fields.trailText : 'Artículo sobre biocombustibles y energía sostenible.',
+            image: (item.fields && item.fields.thumbnail) ? item.fields.thumbnail : FALLBACK_IMG,
+            url: item.webUrl,
+            date: new Date(item.webPublicationDate).toLocaleDateString('es-AR', {day:'numeric', month:'long', year:'numeric'})
+          };
+        }));
+      } else {
+        renderCards(FALLBACK);
+      }
+    })
+    .catch(function(){ renderCards(FALLBACK); });
+});
 
 /* ─── NEWSLETTER ─── */
 function submitNewsletter(){
