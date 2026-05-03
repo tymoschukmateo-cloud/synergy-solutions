@@ -1,8 +1,14 @@
-const CORS_HEADERS = {
+const SUCCESS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Content-Type',
   'Content-Type': 'application/json',
   'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
+};
+
+const ERROR_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Content-Type': 'application/json',
+  'Cache-Control': 'no-store',
 };
 
 exports.handler = async function () {
@@ -10,7 +16,7 @@ exports.handler = async function () {
   if (!apiKey) {
     return {
       statusCode: 500,
-      headers: CORS_HEADERS,
+      headers: ERROR_HEADERS,
       body: JSON.stringify({ error: 'GNEWS_API_KEY no configurada' }),
     };
   }
@@ -31,14 +37,14 @@ exports.handler = async function () {
     const data = await response.json();
     return {
       statusCode: 200,
-      headers: CORS_HEADERS,
+      headers: SUCCESS_HEADERS,
       body: JSON.stringify(data),
     };
   } catch (err) {
     clearTimeout(timeout);
     return {
       statusCode: 502,
-      headers: CORS_HEADERS,
+      headers: ERROR_HEADERS,
       body: JSON.stringify({ error: err.message }),
     };
   }

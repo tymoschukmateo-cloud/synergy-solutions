@@ -1607,11 +1607,15 @@ document.addEventListener('DOMContentLoaded', function(){
     }).join('');
   }
 
+  // Mostrar fallback inmediatamente — nunca queda el spinner colgado
+  renderCards(FALLBACK);
+
+  // Intentar actualizar con noticias reales en segundo plano
   var ctrl = new AbortController();
-  var tid = setTimeout(function(){ ctrl.abort(); }, 8000);
+  setTimeout(function(){ ctrl.abort(); }, 8000);
 
   fetch('/.netlify/functions/noticias', { signal: ctrl.signal })
-    .then(function(r){ clearTimeout(tid); return r.json(); })
+    .then(function(r){ return r.json(); })
     .then(function(data){
       if(data.articles && data.articles.length > 0){
         renderCards(data.articles.map(function(a){
@@ -1623,11 +1627,9 @@ document.addEventListener('DOMContentLoaded', function(){
             date: new Date(a.publishedAt).toLocaleDateString('es-AR', {day:'numeric', month:'long', year:'numeric'})
           };
         }));
-      } else {
-        renderCards(FALLBACK);
       }
     })
-    .catch(function(){ clearTimeout(tid); renderCards(FALLBACK); });
+    .catch(function(){}); // fallback ya renderizado, no hace falta hacer nada
 });
 
 /* ─── NEWSLETTER ─── */
