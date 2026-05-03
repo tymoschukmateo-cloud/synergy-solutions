@@ -2,6 +2,7 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Content-Type',
   'Content-Type': 'application/json',
+  'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
 };
 
 exports.handler = async function () {
@@ -21,8 +22,12 @@ exports.handler = async function () {
     '&max=3' +
     '&apikey=' + apiKey;
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 7000);
+
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeout);
     const data = await response.json();
     return {
       statusCode: 200,
@@ -30,6 +35,7 @@ exports.handler = async function () {
       body: JSON.stringify(data),
     };
   } catch (err) {
+    clearTimeout(timeout);
     return {
       statusCode: 502,
       headers: CORS_HEADERS,

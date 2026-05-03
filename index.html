@@ -1607,8 +1607,11 @@ document.addEventListener('DOMContentLoaded', function(){
     }).join('');
   }
 
-  fetch('/.netlify/functions/noticias')
-    .then(function(r){ return r.json(); })
+  var ctrl = new AbortController();
+  var tid = setTimeout(function(){ ctrl.abort(); }, 8000);
+
+  fetch('/.netlify/functions/noticias', { signal: ctrl.signal })
+    .then(function(r){ clearTimeout(tid); return r.json(); })
     .then(function(data){
       if(data.articles && data.articles.length > 0){
         renderCards(data.articles.map(function(a){
@@ -1624,7 +1627,7 @@ document.addEventListener('DOMContentLoaded', function(){
         renderCards(FALLBACK);
       }
     })
-    .catch(function(){ renderCards(FALLBACK); });
+    .catch(function(){ clearTimeout(tid); renderCards(FALLBACK); });
 });
 
 /* ─── NEWSLETTER ─── */
