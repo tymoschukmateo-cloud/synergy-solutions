@@ -1610,12 +1610,12 @@ document.addEventListener('DOMContentLoaded', function(){
   fetch('/.netlify/functions/noticias')
     .then(function(r){ return r.json(); })
     .then(function(data){
-      if(data.status === 'ok' && data.articles && data.articles.length > 0){
+      if(data.articles && data.articles.length > 0){
         renderCards(data.articles.map(function(a){
           return {
             title: a.title || 'Sin título',
             description: a.description || 'Artículo sobre biocombustibles y energía sostenible.',
-            image: a.urlToImage || FALLBACK_IMG,
+            image: a.image || FALLBACK_IMG,
             url: a.url,
             date: new Date(a.publishedAt).toLocaleDateString('es-AR', {day:'numeric', month:'long', year:'numeric'})
           };

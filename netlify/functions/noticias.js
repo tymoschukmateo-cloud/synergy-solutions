@@ -5,22 +5,21 @@ const CORS_HEADERS = {
 };
 
 exports.handler = async function () {
-  const apiKey = process.env.NEWS_API_KEY;
+  const apiKey = process.env.GNEWS_API_KEY;
   if (!apiKey) {
     return {
       statusCode: 500,
       headers: CORS_HEADERS,
-      body: JSON.stringify({ error: 'NEWS_API_KEY no configurada' }),
+      body: JSON.stringify({ error: 'GNEWS_API_KEY no configurada' }),
     };
   }
 
   const url =
-    'https://newsapi.org/v2/everything' +
+    'https://gnews.io/api/v4/search' +
     '?q=bioetanol+OR+bioethanol' +
-    '&language=es' +
-    '&pageSize=3' +
-    '&sortBy=publishedAt' +
-    '&apiKey=' + apiKey;
+    '&lang=es' +
+    '&max=3' +
+    '&apikey=' + apiKey;
 
   try {
     const response = await fetch(url);
